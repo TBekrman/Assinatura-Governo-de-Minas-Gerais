@@ -7,7 +7,7 @@ const $ = (id) => document.getElementById(id);
 const telas = { login: $("tela-login"), carregando: $("tela-carregando"), editor: $("tela-editor") };
 const form = $("form");
 const CAMPOS = ["nome", "cargo", "orgao", "telefone", "celular", "endereco"];
-const OBRIGATORIOS = ["nome", "cargo", "telefone", "endereco"];
+const OBRIGATORIOS = ["nome", "cargo", "endereco"];
 // Secretaria fixa: não pode ser alterada pelo usuário
 const SECRETARIA = "Secretaria de Estado de Educação (SEE/MG)";
 
