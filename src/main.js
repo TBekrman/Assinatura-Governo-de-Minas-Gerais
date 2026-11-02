@@ -43,9 +43,11 @@ function htmlAtual() {
   return gerarAssinatura(dadosForm(), { comLogo: temLogo });
 }
 
+// Pré-visualização: mostra o modelo completo, com textos de exemplo nos campos vazios,
+// que vão sendo substituídos conforme o usuário digita.
 function atualizarPreview() {
   if (!usuario) return;
-  $("preview").innerHTML = htmlAtual();
+  $("preview").innerHTML = gerarAssinatura(dadosForm(), { comLogo: temLogo, logoSrc: "/logo-mg.png", exemplo: true });
 }
 
 // ---------- Autenticação ----------
@@ -126,13 +128,19 @@ form.addEventListener("submit", async (ev) => {
   }
 });
 
+function textoPlano(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerText || div.textContent;
+}
+
 async function copiar(html, comoTexto) {
   try {
     if (!comoTexto && window.ClipboardItem) {
       await navigator.clipboard.write([
         new ClipboardItem({
           "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([$("preview").innerText], { type: "text/plain" }),
+          "text/plain": new Blob([textoPlano(html)], { type: "text/plain" }),
         }),
       ]);
     } else {
@@ -152,6 +160,34 @@ async function copiar(html, comoTexto) {
 
 $("btn-copiar").addEventListener("click", () => copiar(htmlAtual(), false));
 $("btn-copiar-html").addEventListener("click", () => copiar(htmlAtual(), true));
+
+// Baixa a assinatura como imagem JPEG (sem os textos de exemplo)
+$("btn-jpeg").addEventListener("click", async () => {
+  if (!form.elements.nome.value.trim()) {
+    form.elements.nome.focus();
+    setStatus("Informe o nome antes de baixar a imagem.", "erro");
+    return;
+  }
+  setStatus("Gerando imagem…");
+  const palco = document.createElement("div");
+  palco.style.cssText = "position:fixed;left:-10000px;top:0;padding:16px;background:#fff;display:inline-block;";
+  palco.innerHTML = gerarAssinatura(dadosForm(), { comLogo: temLogo, logoSrc: "/logo-mg.png" });
+  document.body.appendChild(palco);
+  try {
+    const { default: html2canvas } = await import("html2canvas");
+    const canvas = await html2canvas(palco, { backgroundColor: "#ffffff", scale: 3, useCORS: true, logging: false });
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/jpeg", 0.95);
+    a.download = "assinatura-" + (form.elements.nome.value.trim().split(/\s+/)[0] || "email").toLowerCase() + ".jpg";
+    a.click();
+    setStatus("Imagem JPEG baixada ✓", "ok");
+  } catch (e) {
+    console.error(e);
+    setStatus("Não foi possível gerar a imagem.", "erro");
+  } finally {
+    palco.remove();
+  }
+});
 
 $("btn-baixar").addEventListener("click", () => {
   const pagina = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Assinatura</title></head><body>${htmlAtual()}</body></html>`;

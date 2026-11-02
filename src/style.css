@@ -40,6 +40,9 @@ input[readonly] { background: #f2f4f7; color: var(--cinza); }
 .btn-google { display: inline-flex; gap: 10px; align-items: center; background: #fff; color: #333; border-color: #d0d5dd; margin-top: 8px; }
 
 .preview { border: 1px dashed var(--borda); border-radius: 8px; padding: 20px; overflow-x: auto; background: #fff; }
+.dica { margin: -4px 0 12px; font-size: 13px; color: var(--cinza); }
+.editor > .card:last-child { position: sticky; top: 16px; }
+@media (max-width: 860px) { .editor > .card:last-child { position: static; } }
 .status { font-size: 14px; color: var(--cinza); }
 .status.ok { color: #067647; }
 .status.erro, .erro { color: #b42318; }

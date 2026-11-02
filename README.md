@@ -19,7 +19,7 @@ A restrição é aplicada em duas camadas:
 ## Configuração no Console do Firebase (uma vez)
 
 1. **Authentication → Sign-in method → Google → Ativar.**
-2. **Authentication → Settings → Authorized domains:** confira se `studio-7395892416-751c9.web.app`
+2. **Authentication → Settings → Authorized domains:** confira se `assinatura.educacaoensa.com`, `assinatura-ensa.web.app`, `studio-7395892416-751c9.web.app`
    e `localhost` estão na lista (adicione seu domínio próprio, se usar).
 3. **Firestore Database → Criar banco de dados** (modo produção, região `southamerica-east1`).
 4. Coloque o logotipo oficial em `public/logo-mg.png` (PNG, ~220px de largura).
@@ -40,4 +40,6 @@ firebase login
 npm run deploy                  # build + deploy de Hosting e regras do Firestore
 ```
 
-Endereço: https://studio-7395892416-751c9.web.app
+Endereços:
+- https://assinatura.educacaoensa.com (site `assinatura-ensa`)
+- https://studio-7395892416-751c9.web.app
