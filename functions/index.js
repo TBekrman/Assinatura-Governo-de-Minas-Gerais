@@ -3,38 +3,18 @@
 
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import nodemailer from "nodemailer";
-
-initializeApp();
-const db = getFirestore();
 
 const SMTP_PASS = defineSecret("SMTP_PASS");
 const SMTP_USER = "nao-responder@educacaoensa.com";
 const REMETENTE = `"Gerador de Assinaturas · SEE/MG" <${SMTP_USER}>`;
 
 const DOMINIO = "@educacao.mg.gov.br";
-const LIMITE_POR_HORA = 10;
 const TAMANHO_MAX = 3 * 1024 * 1024; // 3 MB
 const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[^\s@<>()",;:]+$/;
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const limpar = (s, max) => String(s ?? "").replace(/[\r\n\t]+/g, " ").trim().slice(0, max);
-
-/** Limite de envios por usuário (janela de 1 hora), guardado em envios/{uid}. */
-async function verificarLimite(uid) {
-  const ref = db.collection("envios").doc(uid);
-  await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const agora = Date.now();
-    const recentes = (snap.exists ? snap.data().horarios || [] : []).filter((t) => agora - t < 3600_000);
-    if (recentes.length >= LIMITE_POR_HORA) {
-      throw new HttpsError("resource-exhausted", `Limite de ${LIMITE_POR_HORA} envios por hora atingido. Tente mais tarde.`);
-    }
-    tx.set(ref, { horarios: [...recentes, agora], atualizadoEm: FieldValue.serverTimestamp() });
-  });
-}
 
 function corpoHtml(nome) {
   const n = esc(nome);
@@ -122,8 +102,6 @@ export const enviarAssinatura = onCall(
     if (buffer.length > TAMANHO_MAX || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
       throw new HttpsError("invalid-argument", "Imagem inválida.");
     }
-
-    await verificarLimite(req.auth.uid);
 
     const transporte = nodemailer.createTransport({
       host: "smtp.hostinger.com",
