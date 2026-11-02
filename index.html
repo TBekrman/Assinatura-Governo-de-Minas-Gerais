@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assinatura de E-mail · SEE/MG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -42,53 +45,55 @@
     <section id="tela-editor" class="editor" hidden>
       <form id="form" class="card" novalidate>
         <h2>Seus dados</h2>
-        <label>Nome completo *
-          <input name="nome" required maxlength="120" autocomplete="name" />
+        <p class="dica">Preencha seus dados e clique em <b>Criar imagem</b>. Campos com <span class="obr">*</span> são obrigatórios.</p>
+        <label>Nome <span class="obr">*</span>
+          <input name="nome" required maxlength="60" autocomplete="name" placeholder="Seu nome" />
         </label>
-        <label>Cargo / Função
-          <input name="cargo" maxlength="120" placeholder="Ex.: Analista Educacional" />
+        <label>Cargo <span class="obr">*</span>
+          <input name="cargo" required maxlength="80" placeholder="Seu cargo" />
         </label>
-        <label>MASP
-          <input name="masp" maxlength="20" inputmode="numeric" />
+        <label>Secretaria <span class="obr">*</span>
+          <input name="secretaria" required maxlength="100" placeholder="Secretaria de Estado de Educação" />
         </label>
-        <label>Setor / Diretoria
-          <input name="setor" maxlength="160" placeholder="Ex.: Diretoria de Tecnologia" />
+        <label>Órgão dentro da Secretaria
+          <input name="orgao" maxlength="100" placeholder="Diretoria de ........." />
         </label>
-        <label>Unidade
-          <input name="unidade" maxlength="160" placeholder="Ex.: SRE Metropolitana A / E.E. ..." />
-        </label>
-        <label>Endereço
-          <input name="endereco" maxlength="240" placeholder="Rod. Papa João Paulo II, 4143 – Serra Verde, Belo Horizonte/MG" />
-        </label>
-        <label>Telefone
-          <input name="telefone" maxlength="40" inputmode="tel" placeholder="(31) 3915-0000" />
-        </label>
-        <label>E-mail
+        <div class="duas">
+          <label>Telefone fixo <span class="obr">*</span>
+            <input name="telefone" required maxlength="20" inputmode="tel" placeholder="31 3915-0000" />
+          </label>
+          <label>Telefone celular
+            <input name="celular" maxlength="20" inputmode="tel" placeholder="31 90000-0000" />
+          </label>
+        </div>
+        <label>E-mail no Governo
           <input name="email" readonly />
         </label>
+        <label>Endereço do trabalho <span class="obr">*</span>
+          <input name="endereco" required maxlength="100" placeholder="Cidade Administrativa, Prédio Tiradentes, 3º andar" />
+        </label>
         <div class="acoes">
-          <button type="submit" class="btn">Salvar</button>
+          <button type="submit" class="btn btn-sec">Salvar dados</button>
           <span id="status" class="status" role="status"></span>
         </div>
       </form>
 
       <div class="card">
-        <h2>Pré-visualização</h2>
-        <p class="dica">O modelo é atualizado enquanto você digita. Textos em cinza claro são exemplos e não aparecem na assinatura final.</p>
-        <div id="preview" class="preview"></div>
+        <h2>Sua assinatura</h2>
+        <p class="dica">A imagem é atualizada enquanto você digita. Textos claros são exemplos e não saem na imagem final.</p>
+        <canvas id="preview" class="preview" width="1680" height="700" aria-label="Pré-visualização da assinatura"></canvas>
         <div class="acoes">
-          <button id="btn-copiar" class="btn">Copiar assinatura</button>
-          <button id="btn-jpeg" class="btn btn-sec">Baixar imagem (JPEG)</button>
-          <button id="btn-copiar-html" class="btn btn-sec">Copiar HTML</button>
-          <button id="btn-baixar" class="btn btn-sec">Baixar .html</button>
+          <button id="btn-jpeg" class="btn">Criar imagem (JPEG)</button>
+          <button id="btn-copiar" class="btn btn-sec">Copiar imagem</button>
         </div>
         <details class="ajuda">
           <summary>Como usar no Gmail</summary>
           <ol>
-            <li>Clique em <b>Copiar assinatura</b>.</li>
+            <li>Clique em <b>Criar imagem (JPEG)</b> para baixar a assinatura.</li>
             <li>No Gmail, abra ⚙️ <b>Configurações → Ver todas as configurações</b>.</li>
             <li>Na aba <b>Geral</b>, em <b>Assinatura</b>, clique em <b>Criar nova</b>.</li>
-            <li>Cole (Ctrl+V) no campo da assinatura e clique em <b>Salvar alterações</b> no fim da página.</li>
+            <li>No editor da assinatura, clique no ícone <b>Inserir imagem</b> e envie o arquivo JPEG (pelo upload ou pelo Google Drive).</li>
+            <li>Clique em <b>Salvar alterações</b> no fim da página.</li>
           </ol>
         </details>
       </div>

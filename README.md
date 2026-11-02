@@ -1,8 +1,13 @@
 # Assinatura de E-mail · Governo de Minas Gerais (SEE/MG)
 
-Gerador de assinatura de e-mail institucional. Qualquer servidor com conta
-**@educacao.mg.gov.br** entra com o Google, preenche seus dados, salva e copia
-a assinatura para o Gmail.
+Gerador de assinatura de e-mail institucional em imagem (JPEG). Qualquer servidor com conta
+**@educacao.mg.gov.br** entra com o Google, preenche seus dados, vê a imagem sendo montada
+em tempo real e baixa a assinatura pronta.
+
+O modelo segue a planilha `PlanilhaGGOV.xlsx`: a arte de fundo é
+[public/assinatura-base.png](public/assinatura-base.png) (840 × 350 px) e os textos são
+desenhados por cima em [src/assinatura.js](src/assinatura.js), com as mesmas regras das
+fórmulas da aba "Imagem base" (órgão/secretaria em maiúsculas, "fixo / celular").
 
 **Stack:** Vite + JavaScript, Firebase Authentication (Google), Cloud Firestore, Firebase Hosting.
 
@@ -22,8 +27,6 @@ A restrição é aplicada em duas camadas:
 2. **Authentication → Settings → Authorized domains:** confira se `assinatura.educacaoensa.com`, `assinatura-ensa.web.app`, `studio-7395892416-751c9.web.app`
    e `localhost` estão na lista (adicione seu domínio próprio, se usar).
 3. **Firestore Database → Criar banco de dados** (modo produção, região `southamerica-east1`).
-4. Coloque o logotipo oficial em `public/logo-mg.png` (PNG, ~220px de largura).
-   Sem ele, a assinatura é gerada sem imagem.
 
 ## Rodar localmente
 

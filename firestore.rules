@@ -9,17 +9,21 @@ service cloud.firestore {
         && request.auth.token.email.matches('^[^@]+@educacao[.]mg[.]gov[.]br$');
     }
 
+    function texto(d, campo, max) {
+      return d[campo] is string && d[campo].size() <= max;
+    }
+
     function dadosValidos() {
       let d = request.resource.data;
-      return d.keys().hasOnly(['nome', 'cargo', 'masp', 'setor', 'unidade',
-                               'endereco', 'telefone', 'email', 'atualizadoEm'])
-        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 120
-        && d.cargo is string && d.cargo.size() <= 120
-        && d.masp is string && d.masp.size() <= 20
-        && d.setor is string && d.setor.size() <= 160
-        && d.unidade is string && d.unidade.size() <= 160
-        && d.endereco is string && d.endereco.size() <= 240
-        && d.telefone is string && d.telefone.size() <= 40
+      return d.keys().hasOnly(['nome', 'cargo', 'secretaria', 'orgao', 'telefone',
+                               'celular', 'endereco', 'email', 'atualizadoEm'])
+        && texto(d, 'nome', 60) && d.nome.size() > 0
+        && texto(d, 'cargo', 80)
+        && texto(d, 'secretaria', 100)
+        && texto(d, 'orgao', 100)
+        && texto(d, 'telefone', 20)
+        && texto(d, 'celular', 20)
+        && texto(d, 'endereco', 100)
         && d.email == request.auth.token.email
         && d.atualizadoEm == request.time;
     }

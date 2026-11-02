@@ -1,15 +1,15 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, DOMINIO, emailInstitucional } from "./firebase.js";
-import { gerarAssinatura } from "./signature.js";
+import { desenhar, prepararRecursos } from "./assinatura.js";
 
 const $ = (id) => document.getElementById(id);
 const telas = { login: $("tela-login"), carregando: $("tela-carregando"), editor: $("tela-editor") };
 const form = $("form");
-const CAMPOS = ["nome", "cargo", "masp", "setor", "unidade", "endereco", "telefone"];
+const CAMPOS = ["nome", "cargo", "secretaria", "orgao", "telefone", "celular", "endereco"];
+const OBRIGATORIOS = ["nome", "cargo", "secretaria", "telefone", "endereco"];
 
 let usuario = null;
-let temLogo = false;
 
 function mostrar(nome) {
   for (const [k, el] of Object.entries(telas)) el.hidden = k !== nome;
@@ -27,11 +27,6 @@ function setStatus(msg, tipo = "") {
   el.className = "status " + tipo;
 }
 
-// Verifica se o logotipo existe no Hosting; sem ele, a assinatura sai sem imagem.
-const img = new Image();
-img.onload = () => { temLogo = true; atualizarPreview(); };
-img.src = "/logo-mg.png";
-
 function dadosForm() {
   const d = {};
   for (const c of CAMPOS) d[c] = form.elements[c].value.trim();
@@ -39,16 +34,16 @@ function dadosForm() {
   return d;
 }
 
-function htmlAtual() {
-  return gerarAssinatura(dadosForm(), { comLogo: temLogo });
-}
-
-// Pré-visualização: mostra o modelo completo, com textos de exemplo nos campos vazios,
-// que vão sendo substituídos conforme o usuário digita.
+// Pré-visualização: redesenha a imagem a cada alteração (agrupado por quadro de animação)
+let pedido = 0;
 function atualizarPreview() {
   if (!usuario) return;
-  $("preview").innerHTML = gerarAssinatura(dadosForm(), { comLogo: temLogo, logoSrc: "/logo-mg.png", exemplo: true });
+  cancelAnimationFrame(pedido);
+  pedido = requestAnimationFrame(() => desenhar($("preview"), dadosForm(), { exemplo: true }));
 }
+
+// Assim que as fontes carregarem, redesenha com a fonte correta
+prepararRecursos().then(atualizarPreview);
 
 // ---------- Autenticação ----------
 const provider = new GoogleAuthProvider();
@@ -104,95 +99,88 @@ onAuthStateChanged(auth, async (user) => {
     console.error(e);
     setStatus("Não foi possível carregar os dados salvos.", "erro");
   }
-  atualizarPreview();
   mostrar("editor");
+  atualizarPreview();
 });
 
 // ---------- Editor ----------
-form.addEventListener("input", () => { atualizarPreview(); setStatus(""); });
+form.addEventListener("input", (ev) => {
+  ev.target.classList?.remove("invalido");
+  atualizarPreview();
+  setStatus("");
+});
+
+/** Marca os obrigatórios vazios; retorna true se tudo ok. */
+function validar() {
+  const faltando = OBRIGATORIOS.filter((c) => !form.elements[c].value.trim());
+  for (const c of OBRIGATORIOS) form.elements[c].classList.toggle("invalido", faltando.includes(c));
+  if (faltando.length) {
+    form.elements[faltando[0]].focus();
+    setStatus("Preencha os campos obrigatórios.", "erro");
+    return false;
+  }
+  return true;
+}
+
+async function salvar() {
+  await setDoc(doc(db, "assinaturas", usuario.uid), { ...dadosForm(), atualizadoEm: serverTimestamp() });
+}
 
 form.addEventListener("submit", async (ev) => {
   ev.preventDefault();
-  if (!form.elements.nome.value.trim()) {
-    form.elements.nome.focus();
-    setStatus("Informe o nome.", "erro");
-    return;
-  }
+  if (!validar()) return;
   setStatus("Salvando…");
   try {
-    await setDoc(doc(db, "assinaturas", usuario.uid), { ...dadosForm(), atualizadoEm: serverTimestamp() });
-    setStatus("Salvo ✓", "ok");
+    await salvar();
+    setStatus("Dados salvos ✓", "ok");
   } catch (e) {
     console.error(e);
     setStatus("Erro ao salvar: " + (e.code || e.message), "erro");
   }
 });
 
-function textoPlano(html) {
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  return div.innerText || div.textContent;
+/** Gera a imagem final (sem textos de exemplo) em alta resolução. */
+async function imagemFinal() {
+  await prepararRecursos();
+  const canvas = document.createElement("canvas");
+  await desenhar(canvas, dadosForm(), { escala: 2 });
+  return canvas;
 }
 
-async function copiar(html, comoTexto) {
-  try {
-    if (!comoTexto && window.ClipboardItem) {
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([textoPlano(html)], { type: "text/plain" }),
-        }),
-      ]);
-    } else {
-      await navigator.clipboard.writeText(html);
-    }
-    setStatus(comoTexto ? "HTML copiado ✓" : "Assinatura copiada ✓ — cole no Gmail", "ok");
-  } catch {
-    // Fallback: seleciona a pré-visualização para o usuário copiar manualmente
-    const r = document.createRange();
-    r.selectNodeContents($("preview"));
-    const s = getSelection();
-    s.removeAllRanges();
-    s.addRange(r);
-    setStatus("Selecionado — pressione Ctrl+C para copiar.");
-  }
+function nomeArquivo() {
+  const base = form.elements.nome.value.trim().toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `assinatura-${base || "email"}.jpg`;
 }
 
-$("btn-copiar").addEventListener("click", () => copiar(htmlAtual(), false));
-$("btn-copiar-html").addEventListener("click", () => copiar(htmlAtual(), true));
-
-// Baixa a assinatura como imagem JPEG (sem os textos de exemplo)
 $("btn-jpeg").addEventListener("click", async () => {
-  if (!form.elements.nome.value.trim()) {
-    form.elements.nome.focus();
-    setStatus("Informe o nome antes de baixar a imagem.", "erro");
-    return;
-  }
+  if (!validar()) return;
   setStatus("Gerando imagem…");
-  const palco = document.createElement("div");
-  palco.style.cssText = "position:fixed;left:-10000px;top:0;padding:16px;background:#fff;display:inline-block;";
-  palco.innerHTML = gerarAssinatura(dadosForm(), { comLogo: temLogo, logoSrc: "/logo-mg.png" });
-  document.body.appendChild(palco);
   try {
-    const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(palco, { backgroundColor: "#ffffff", scale: 3, useCORS: true, logging: false });
+    const canvas = await imagemFinal();
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/jpeg", 0.95);
-    a.download = "assinatura-" + (form.elements.nome.value.trim().split(/\s+/)[0] || "email").toLowerCase() + ".jpg";
+    a.download = nomeArquivo();
     a.click();
-    setStatus("Imagem JPEG baixada ✓", "ok");
+    setStatus("Imagem JPEG criada ✓", "ok");
+    // Guarda os dados para a próxima vez (sem bloquear o download)
+    salvar().catch((e) => console.error(e));
   } catch (e) {
     console.error(e);
     setStatus("Não foi possível gerar a imagem.", "erro");
-  } finally {
-    palco.remove();
   }
 });
 
-$("btn-baixar").addEventListener("click", () => {
-  const pagina = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Assinatura</title></head><body>${htmlAtual()}</body></html>`;
-  const url = URL.createObjectURL(new Blob([pagina], { type: "text/html" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: "assinatura.html" });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+$("btn-copiar").addEventListener("click", async () => {
+  if (!validar()) return;
+  try {
+    const canvas = await imagemFinal();
+    const png = await new Promise((ok) => canvas.toBlob(ok, "image/png"));
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
+    setStatus("Imagem copiada ✓ — cole com Ctrl+V", "ok");
+  } catch (e) {
+    console.error(e);
+    setStatus("Seu navegador não permitiu copiar. Use “Criar imagem (JPEG)”.", "erro");
+  }
 });

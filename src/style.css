@@ -1,5 +1,5 @@
 :root {
-  --vermelho: #c8102e;
+  --vermelho: #69247e;
   --texto: #222;
   --cinza: #667085;
   --borda: #e4e7ec;
@@ -12,7 +12,7 @@ body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, A
 .topo { background: #fff; border-bottom: 1px solid var(--borda); }
 .topo-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .marca { display: flex; gap: 12px; align-items: center; }
-.marca-bar { width: 6px; height: 38px; background: var(--vermelho); border-radius: 3px; flex: none; }
+.marca-bar { width: 6px; height: 38px; background: #ffde00; border-radius: 3px; flex: none; }
 .marca strong { display: block; }
 .marca small { color: var(--cinza); }
 .usuario { display: flex; gap: 12px; align-items: center; color: var(--cinza); font-size: 14px; }
@@ -30,7 +30,7 @@ h2 { font-size: 18px; }
 
 label { display: block; font-size: 13px; font-weight: 600; color: #344054; margin-bottom: 12px; }
 input { display: block; width: 100%; margin-top: 4px; padding: 9px 11px; font: inherit; border: 1px solid #d0d5dd; border-radius: 8px; }
-input:focus { outline: 2px solid rgba(200, 16, 46, .3); border-color: var(--vermelho); }
+input:focus { outline: 2px solid rgba(105, 36, 126, .3); border-color: var(--vermelho); }
 input[readonly] { background: #f2f4f7; color: var(--cinza); }
 
 .acoes { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
@@ -39,7 +39,11 @@ input[readonly] { background: #f2f4f7; color: var(--cinza); }
 .btn-sec { background: #fff; color: var(--vermelho); }
 .btn-google { display: inline-flex; gap: 10px; align-items: center; background: #fff; color: #333; border-color: #d0d5dd; margin-top: 8px; }
 
-.preview { border: 1px dashed var(--borda); border-radius: 8px; padding: 20px; overflow-x: auto; background: #fff; }
+.preview { display: block; width: 100%; height: auto; aspect-ratio: 840 / 350; border: 1px solid var(--borda); border-radius: 8px; background: #fff; }
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 480px) { .duas { grid-template-columns: 1fr; } }
+.obr { color: #d92d20; font-weight: 700; }
+input.invalido { border-color: #d92d20; background: #fef3f2; }
 .dica { margin: -4px 0 12px; font-size: 13px; color: var(--cinza); }
 .editor > .card:last-child { position: sticky; top: 16px; }
 @media (max-width: 860px) { .editor > .card:last-child { position: static; } }
