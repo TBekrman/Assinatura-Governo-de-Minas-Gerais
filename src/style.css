@@ -44,6 +44,7 @@ input[readonly] { background: #f2f4f7; color: var(--cinza); }
 @media (max-width: 480px) { .duas { grid-template-columns: 1fr; } }
 .obr { color: #d92d20; font-weight: 700; }
 .campo-ajuda { display: block; margin-top: 4px; font-size: 12px; font-weight: 400; color: var(--cinza); }
+.campo-erro { display: block; margin-top: 4px; font-size: 13px; font-weight: 600; color: #b42318; }
 .link { font: inherit; background: none; border: 0; padding: 0; margin-left: 4px; color: var(--vermelho); text-decoration: underline; cursor: pointer; }
 input.invalido { border-color: #d92d20; background: #fef3f2; }
 .dica { margin: -4px 0 12px; font-size: 13px; color: var(--cinza); }

@@ -8,7 +8,25 @@ const telas = { login: $("tela-login"), carregando: $("tela-carregando"), editor
 const form = $("form");
 const CAMPOS = ["nome", "cargo", "orgao", "telefone", "celular", "email", "endereco"];
 const OBRIGATORIOS = ["nome", "cargo", "email", "endereco"];
-const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_VALIDO = /^[^\s@]+@educacao\.mg\.gov\.br$/i;
+
+/** Retorna a mensagem de erro do e-mail, ou "" se estiver válido. */
+function erroEmail(valor) {
+  const v = valor.trim();
+  if (!v) return "Informe o e-mail.";
+  if (!/@educacao\.mg\.gov\.br$/i.test(v)) return `O e-mail deve ser institucional, terminado em @${DOMINIO}.`;
+  if (!EMAIL_VALIDO.test(v)) return "E-mail inválido. Confira se foi digitado corretamente.";
+  return "";
+}
+
+/** Mostra/oculta o aviso abaixo do campo de e-mail. Retorna true se válido. */
+function mostrarErroEmail() {
+  const msg = erroEmail(form.elements.email.value);
+  $("email-erro").textContent = msg;
+  $("email-erro").hidden = !msg;
+  form.elements.email.classList.toggle("invalido", !!msg);
+  return !msg;
+}
 // Secretaria fixa: não pode ser alterada pelo usuário
 const SECRETARIA = "Secretaria de Estado de Educação (SEE/MG)";
 
@@ -89,6 +107,7 @@ onAuthStateChanged(auth, async (user) => {
 
   form.reset();
   form.elements.secretaria.value = SECRETARIA;
+  $("email-erro").hidden = true;
   // Sugestão do e-mail do login no campo de e-mail
   const opcao = document.createElement("option");
   opcao.value = user.email;
@@ -119,16 +138,23 @@ function atualizarBotaoEmail() {
   $("btn-email-login").hidden = !usuario || atual === usuario.email.toLowerCase();
 }
 
+// Ao sair do campo, avisa se o e-mail não é institucional
+form.elements.email.addEventListener("blur", mostrarErroEmail);
+
 $("btn-email-login").addEventListener("click", () => {
   form.elements.email.value = usuario.email;
-  form.elements.email.classList.remove("invalido");
+  mostrarErroEmail();
   atualizarBotaoEmail();
   atualizarPreview();
 });
 
 form.addEventListener("input", (ev) => {
   ev.target.classList?.remove("invalido");
-  if (ev.target.name === "email") atualizarBotaoEmail();
+  if (ev.target.name === "email") {
+    atualizarBotaoEmail();
+    // Enquanto digita, só retira o aviso quando o e-mail ficar válido
+    if (!$("email-erro").hidden) mostrarErroEmail();
+  }
   atualizarPreview();
   setStatus("");
 });
@@ -138,14 +164,14 @@ function validar() {
   const faltando = OBRIGATORIOS.filter((c) => !form.elements[c].value.trim());
   for (const c of OBRIGATORIOS) form.elements[c].classList.toggle("invalido", faltando.includes(c));
   if (faltando.length) {
+    if (faltando.includes("email")) mostrarErroEmail();
     form.elements[faltando[0]].focus();
     setStatus("Preencha os campos obrigatórios.", "erro");
     return false;
   }
-  if (!EMAIL_VALIDO.test(form.elements.email.value.trim())) {
-    form.elements.email.classList.add("invalido");
+  if (!mostrarErroEmail()) {
     form.elements.email.focus();
-    setStatus("Informe um e-mail válido.", "erro");
+    setStatus(erroEmail(form.elements.email.value), "erro");
     return false;
   }
   return true;

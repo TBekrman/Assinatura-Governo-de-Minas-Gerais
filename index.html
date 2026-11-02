@@ -69,7 +69,8 @@
         <label>E-mail <span class="obr">*</span>
           <input name="email" type="email" required maxlength="100" list="emails-sugeridos" autocomplete="off" placeholder="nome@educacao.mg.gov.br" />
           <datalist id="emails-sugeridos"></datalist>
-          <span class="campo-ajuda">Use o e-mail do login ou digite outro.
+          <span id="email-erro" class="campo-erro" role="alert" hidden></span>
+          <span class="campo-ajuda">Use o e-mail do login ou digite outro e-mail @educacao.mg.gov.br.
             <button type="button" id="btn-email-login" class="link" hidden>Usar o e-mail do login</button>
           </span>
         </label>
