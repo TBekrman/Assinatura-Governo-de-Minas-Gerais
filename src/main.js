@@ -6,8 +6,9 @@ import { desenhar, prepararRecursos } from "./assinatura.js";
 const $ = (id) => document.getElementById(id);
 const telas = { login: $("tela-login"), carregando: $("tela-carregando"), editor: $("tela-editor") };
 const form = $("form");
-const CAMPOS = ["nome", "cargo", "orgao", "telefone", "celular", "endereco"];
-const OBRIGATORIOS = ["nome", "cargo", "endereco"];
+const CAMPOS = ["nome", "cargo", "orgao", "telefone", "celular", "email", "endereco"];
+const OBRIGATORIOS = ["nome", "cargo", "email", "endereco"];
+const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Secretaria fixa: não pode ser alterada pelo usuário
 const SECRETARIA = "Secretaria de Estado de Educação (SEE/MG)";
 
@@ -33,7 +34,6 @@ function dadosForm() {
   const d = {};
   for (const c of CAMPOS) d[c] = form.elements[c].value.trim();
   d.secretaria = SECRETARIA;
-  d.email = usuario?.email ?? "";
   return d;
 }
 
@@ -88,8 +88,11 @@ onAuthStateChanged(auth, async (user) => {
   mostrar("carregando");
 
   form.reset();
-  form.elements.email.value = user.email;
   form.elements.secretaria.value = SECRETARIA;
+  // Sugestão do e-mail do login no campo de e-mail
+  const opcao = document.createElement("option");
+  opcao.value = user.email;
+  $("emails-sugeridos").replaceChildren(opcao);
   setStatus("");
   try {
     const snap = await getDoc(doc(db, "assinaturas", user.uid));
@@ -103,13 +106,29 @@ onAuthStateChanged(auth, async (user) => {
     console.error(e);
     setStatus("Não foi possível carregar os dados salvos.", "erro");
   }
+  // Por padrão, o e-mail é o do login
+  if (!form.elements.email.value.trim()) form.elements.email.value = user.email;
+  atualizarBotaoEmail();
   mostrar("editor");
   atualizarPreview();
 });
 
 // ---------- Editor ----------
+function atualizarBotaoEmail() {
+  const atual = form.elements.email.value.trim().toLowerCase();
+  $("btn-email-login").hidden = !usuario || atual === usuario.email.toLowerCase();
+}
+
+$("btn-email-login").addEventListener("click", () => {
+  form.elements.email.value = usuario.email;
+  form.elements.email.classList.remove("invalido");
+  atualizarBotaoEmail();
+  atualizarPreview();
+});
+
 form.addEventListener("input", (ev) => {
   ev.target.classList?.remove("invalido");
+  if (ev.target.name === "email") atualizarBotaoEmail();
   atualizarPreview();
   setStatus("");
 });
@@ -121,6 +140,12 @@ function validar() {
   if (faltando.length) {
     form.elements[faltando[0]].focus();
     setStatus("Preencha os campos obrigatórios.", "erro");
+    return false;
+  }
+  if (!EMAIL_VALIDO.test(form.elements.email.value.trim())) {
+    form.elements.email.classList.add("invalido");
+    form.elements.email.focus();
+    setStatus("Informe um e-mail válido.", "erro");
     return false;
   }
   return true;

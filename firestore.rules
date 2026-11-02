@@ -24,7 +24,7 @@ service cloud.firestore {
         && texto(d, 'telefone', 20)
         && texto(d, 'celular', 20)
         && texto(d, 'endereco', 100)
-        && d.email == request.auth.token.email
+        && texto(d, 'email', 100) && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
         && d.atualizadoEm == request.time;
     }
 
