@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assinatura de E-mail · SEE/MG</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-inner">
+      <div class="marca">
+        <span class="marca-bar"></span>
+        <div>
+          <strong>Governo de Minas Gerais</strong>
+          <small>Secretaria de Estado de Educação · Gerador de assinatura de e-mail</small>
+        </div>
+      </div>
+      <div id="usuario" class="usuario" hidden>
+        <span id="usuario-email"></span>
+        <button id="btn-sair" class="btn btn-sec">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Tela de login -->
+    <section id="tela-login" class="card login" hidden>
+      <h1>Acesso restrito</h1>
+      <p>Entre com sua conta institucional <b>@educacao.mg.gov.br</b> para criar sua assinatura de e-mail.</p>
+      <button id="btn-google" class="btn btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        Entrar com Google
+      </button>
+      <p id="login-erro" class="erro" hidden></p>
+    </section>
+
+    <!-- Carregando -->
+    <section id="tela-carregando" class="carregando">Carregando…</section>
+
+    <!-- Editor -->
+    <section id="tela-editor" class="editor" hidden>
+      <form id="form" class="card" novalidate>
+        <h2>Seus dados</h2>
+        <label>Nome completo *
+          <input name="nome" required maxlength="120" autocomplete="name" />
+        </label>
+        <label>Cargo / Função
+          <input name="cargo" maxlength="120" placeholder="Ex.: Analista Educacional" />
+        </label>
+        <label>MASP
+          <input name="masp" maxlength="20" inputmode="numeric" />
+        </label>
+        <label>Setor / Diretoria
+          <input name="setor" maxlength="160" placeholder="Ex.: Diretoria de Tecnologia" />
+        </label>
+        <label>Unidade
+          <input name="unidade" maxlength="160" placeholder="Ex.: SRE Metropolitana A / E.E. ..." />
+        </label>
+        <label>Endereço
+          <input name="endereco" maxlength="240" placeholder="Rod. Papa João Paulo II, 4143 – Serra Verde, Belo Horizonte/MG" />
+        </label>
+        <label>Telefone
+          <input name="telefone" maxlength="40" inputmode="tel" placeholder="(31) 3915-0000" />
+        </label>
+        <label>E-mail
+          <input name="email" readonly />
+        </label>
+        <div class="acoes">
+          <button type="submit" class="btn">Salvar</button>
+          <span id="status" class="status" role="status"></span>
+        </div>
+      </form>
+
+      <div class="card">
+        <h2>Pré-visualização</h2>
+        <div id="preview" class="preview"></div>
+        <div class="acoes">
+          <button id="btn-copiar" class="btn">Copiar assinatura</button>
+          <button id="btn-copiar-html" class="btn btn-sec">Copiar HTML</button>
+          <button id="btn-baixar" class="btn btn-sec">Baixar .html</button>
+        </div>
+        <details class="ajuda">
+          <summary>Como usar no Gmail</summary>
+          <ol>
+            <li>Clique em <b>Copiar assinatura</b>.</li>
+            <li>No Gmail, abra ⚙️ <b>Configurações → Ver todas as configurações</b>.</li>
+            <li>Na aba <b>Geral</b>, em <b>Assinatura</b>, clique em <b>Criar nova</b>.</li>
+            <li>Cole (Ctrl+V) no campo da assinatura e clique em <b>Salvar alterações</b> no fim da página.</li>
+          </ol>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

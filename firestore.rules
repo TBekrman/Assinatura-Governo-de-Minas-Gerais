@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Usuário autenticado com e-mail institucional verificado
+    function isInstitucional() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@educacao[.]mg[.]gov[.]br$');
+    }
+
+    function dadosValidos() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['nome', 'cargo', 'masp', 'setor', 'unidade',
+                               'endereco', 'telefone', 'email', 'atualizadoEm'])
+        && d.nome is string && d.nome.size() > 0 && d.nome.size() <= 120
+        && d.cargo is string && d.cargo.size() <= 120
+        && d.masp is string && d.masp.size() <= 20
+        && d.setor is string && d.setor.size() <= 160
+        && d.unidade is string && d.unidade.size() <= 160
+        && d.endereco is string && d.endereco.size() <= 240
+        && d.telefone is string && d.telefone.size() <= 40
+        && d.email == request.auth.token.email
+        && d.atualizadoEm == request.time;
+    }
+
+    // Cada usuário só lê/grava a própria assinatura
+    match /assinaturas/{uid} {
+      allow read: if isInstitucional() && request.auth.uid == uid;
+      allow create, update: if isInstitucional() && request.auth.uid == uid && dadosValidos();
+      allow delete: if isInstitucional() && request.auth.uid == uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
