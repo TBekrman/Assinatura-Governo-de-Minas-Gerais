@@ -89,6 +89,7 @@
         <canvas id="preview" class="preview" width="1680" height="700" aria-label="Pré-visualização da assinatura"></canvas>
         <div class="acoes">
           <button id="btn-jpeg" class="btn">Criar imagem (JPEG)</button>
+          <button id="btn-enviar" class="btn btn-sec">Enviar por e-mail</button>
           <button id="btn-copiar" class="btn btn-sec">Copiar imagem</button>
         </div>
         <details class="ajuda">
@@ -104,6 +105,22 @@
       </div>
     </section>
   </main>
+
+  <!-- Caixa de envio por e-mail -->
+  <dialog id="dlg-enviar" class="dialogo" aria-labelledby="dlg-titulo">
+    <form id="form-enviar" method="dialog" novalidate>
+      <h2 id="dlg-titulo">Enviar assinatura por e-mail</h2>
+      <p class="dica">A imagem da assinatura será enviada em anexo para o endereço abaixo.</p>
+      <label>Enviar para
+        <input name="para" type="email" required maxlength="120" autocomplete="email" placeholder="nome@exemplo.com" />
+      </label>
+      <p id="enviar-msg" class="status" role="status"></p>
+      <div class="acoes acoes-fim">
+        <button type="button" id="btn-cancelar-envio" class="btn btn-sec">Cancelar</button>
+        <button type="submit" id="btn-confirmar-envio" class="btn">Enviar</button>
+      </div>
+    </form>
+  </dialog>
 
   <script type="module" src="/src/main.js"></script>
 </body>

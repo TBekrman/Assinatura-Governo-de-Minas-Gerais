@@ -1,6 +1,7 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, DOMINIO, emailInstitucional } from "./firebase.js";
+import { httpsCallable } from "firebase/functions";
+import { auth, db, functions, DOMINIO, emailInstitucional } from "./firebase.js";
 import { desenhar, prepararRecursos } from "./assinatura.js";
 
 const $ = (id) => document.getElementById(id);
@@ -237,5 +238,54 @@ $("btn-copiar").addEventListener("click", async () => {
   } catch (e) {
     console.error(e);
     setStatus("Seu navegador não permitiu copiar. Use “Criar imagem (JPEG)”.", "erro");
+  }
+});
+
+// ---------- Envio por e-mail ----------
+const dlg = $("dlg-enviar");
+const formEnviar = $("form-enviar");
+const enviarAssinatura = httpsCallable(functions, "enviarAssinatura");
+
+function msgEnvio(msg, tipo = "") {
+  $("enviar-msg").textContent = msg;
+  $("enviar-msg").className = "status " + tipo;
+}
+
+$("btn-enviar").addEventListener("click", () => {
+  if (!validar()) return;
+  formEnviar.elements.para.value = form.elements.email.value.trim();
+  msgEnvio("");
+  $("btn-confirmar-envio").disabled = false;
+  dlg.showModal();
+  formEnviar.elements.para.select();
+});
+
+$("btn-cancelar-envio").addEventListener("click", () => dlg.close());
+
+formEnviar.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const para = formEnviar.elements.para.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(para)) {
+    msgEnvio("Informe um e-mail válido.", "erro");
+    formEnviar.elements.para.focus();
+    return;
+  }
+  const botao = $("btn-confirmar-envio");
+  botao.disabled = true;
+  msgEnvio("Enviando…");
+  try {
+    const canvas = await imagemFinal();
+    await enviarAssinatura({
+      para,
+      nome: form.elements.nome.value.trim(),
+      imagem: canvas.toDataURL("image/jpeg", 0.92),
+    });
+    dlg.close();
+    setStatus(`Assinatura enviada para ${para} ✓`, "ok");
+    salvar().catch((e) => console.error(e));
+  } catch (e) {
+    console.error(e);
+    msgEnvio(e.message && e.code !== "functions/internal" ? e.message : "Não foi possível enviar. Tente novamente.", "erro");
+    botao.disabled = false;
   }
 });
