@@ -14,7 +14,7 @@ const FONTE = "'Nunito', 'Arial Rounded MT Bold', 'Arial Rounded MT', Arial, san
 export const EXEMPLOS = {
   nome: "Seu nome",
   cargo: "Seu cargo",
-  secretaria: "Secretaria de .........",
+  secretaria: "Secretaria de Estado de Educação (SEE/MG)",
   orgao: "Diretoria de .........",
   telefone: "31 3915-0000",
   celular: "",

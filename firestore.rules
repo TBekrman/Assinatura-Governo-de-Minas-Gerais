@@ -19,7 +19,7 @@ service cloud.firestore {
                                'celular', 'endereco', 'email', 'atualizadoEm'])
         && texto(d, 'nome', 60) && d.nome.size() > 0
         && texto(d, 'cargo', 80)
-        && texto(d, 'secretaria', 100)
+        && d.secretaria == 'Secretaria de Estado de Educação (SEE/MG)'
         && texto(d, 'orgao', 100)
         && texto(d, 'telefone', 20)
         && texto(d, 'celular', 20)

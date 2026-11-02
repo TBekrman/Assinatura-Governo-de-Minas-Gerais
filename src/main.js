@@ -6,8 +6,10 @@ import { desenhar, prepararRecursos } from "./assinatura.js";
 const $ = (id) => document.getElementById(id);
 const telas = { login: $("tela-login"), carregando: $("tela-carregando"), editor: $("tela-editor") };
 const form = $("form");
-const CAMPOS = ["nome", "cargo", "secretaria", "orgao", "telefone", "celular", "endereco"];
-const OBRIGATORIOS = ["nome", "cargo", "secretaria", "telefone", "endereco"];
+const CAMPOS = ["nome", "cargo", "orgao", "telefone", "celular", "endereco"];
+const OBRIGATORIOS = ["nome", "cargo", "telefone", "endereco"];
+// Secretaria fixa: não pode ser alterada pelo usuário
+const SECRETARIA = "Secretaria de Estado de Educação (SEE/MG)";
 
 let usuario = null;
 
@@ -30,6 +32,7 @@ function setStatus(msg, tipo = "") {
 function dadosForm() {
   const d = {};
   for (const c of CAMPOS) d[c] = form.elements[c].value.trim();
+  d.secretaria = SECRETARIA;
   d.email = usuario?.email ?? "";
   return d;
 }
@@ -86,6 +89,7 @@ onAuthStateChanged(auth, async (user) => {
 
   form.reset();
   form.elements.email.value = user.email;
+  form.elements.secretaria.value = SECRETARIA;
   setStatus("");
   try {
     const snap = await getDoc(doc(db, "assinaturas", user.uid));
